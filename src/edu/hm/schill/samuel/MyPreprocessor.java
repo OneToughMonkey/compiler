@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 /** Praktikumsaufgabe 1
  * Loescht Kommentare aus der Eingabe und gibt den Rest weiter.
- * @author Sam Schill, samuel.schill@hm.edu
  * @version 1.0
  */
 

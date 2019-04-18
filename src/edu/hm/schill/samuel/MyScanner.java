@@ -4,7 +4,6 @@ import edu.hm.cs.rs.compiler.toys.base.BaseScanner;
 
 /**
  * Scanner fuer die dritte Praktikumsaufgabe.
- * @author Samuel Schill, samuel.schill@hm.edu
  * @version 0.1
  */
 public class MyScanner extends BaseScanner {
