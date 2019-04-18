@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<tokenstream>
+  <int/>
+  <identifier value="in"/>
+  <assign/>
+  <numeral value="5"/>
+  <semicolon/>
+  <print/>
+  <identifier value="a"/>
+  <identifier value="number"/>
+  <semicolon/>
+  <numeral value="5"/>
+  <mult/>
+  <numeral value="5"/>
+  <pot/>
+  <numeral value="5"/>
+  <semicolon/>
+  <identifier value="integer"/>
+  <print/>
+  <int/>
+  <identifier value="pint"/>
+  <identifier value="lint"/>
+</tokenstream>

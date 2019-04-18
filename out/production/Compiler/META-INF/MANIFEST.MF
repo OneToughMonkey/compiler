@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Title: Compilertoys
+Package: compilertoys
+Version: build19074
+Author: R. Schiedermeier
+Email: rs@cs.hm.edu
+Webpage: http://sol.cs.hm.edu/rs
+Organization: Munich U of Applied Sciences, FK07 Computer Science
+Course-title: Compiler Construction
+Timestamp: 2019-03-15-08-07
+System: Linux lilli 4.15.0 i686
+Main-Class: edu.hm.cs.rs.compiler.toys.Version
+Created-By: 11 (Oracle Corporation)
+
