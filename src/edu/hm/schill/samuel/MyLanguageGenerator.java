@@ -23,9 +23,15 @@ public class MyLanguageGenerator implements LanguageGenerator {
      * Die maximal zu erzeugende Wortlaenge.
      */
     private int limit;
-
-    private BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-    private Set<String> beenThere = new ConcurrentSkipListSet<>();
+    /**
+     * Eine Queue von ggf. zu expandierenden Strings.
+     */
+    private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+    /**
+     * Ein temporaerer Cache bereits bearbeiteter Strings.
+     * Vermeidet viele unnoetige Berechnungen
+     */
+    private final Set<String> beenThere = new ConcurrentSkipListSet<>();
 
     /**
      * Gibt die Woerter, die die Grammatik im ersten Kommandozeilenargument erzeugt
@@ -38,41 +44,51 @@ public class MyLanguageGenerator implements LanguageGenerator {
                 .forEach(System.out::println);
     }
 
-    public Stream<String> process() {
-        String leftSide;
+    /**
+     * Generiert Expansionen aus den Strings in der Queue und haengt diese an die Queue
+     * an, falls noch Variablen vorkommen, oder gibt sie sonst in einem Stream zurueck,
+     * sofern die Expansion nicht bereits gesehen wurde.
+     * @return Ein Stream aller durchgefuehrten Expansionen, in denen keine Variablen mehr vorkommen.
+     */
+    private Stream<String> process() {
         final Stream.Builder<String> streamBuilder = Stream.builder();
         try {
-            while ((leftSide = queue.poll(5, TimeUnit.MILLISECONDS)) != null) {
-                if (leftSide.equals(leftSide.toLowerCase()))
-                    streamBuilder.accept(leftSide);
-                else
-                    for (String[] rule : rules) {
-                        for (int i = 0; i <= leftSide.length() - rule[0].length(); i++)
-                            if (leftSide.startsWith(rule[0], i)) {
-                                final String expansion = leftSide.substring(0, i)
-                                        + rule[1]
-                                        + leftSide.substring(i + rule[0].length());
-                                if (expansion.length() <= limit && !beenThere.contains(expansion)) {
+            for (String leftSide = queue.poll(10, TimeUnit.MILLISECONDS);
+                 leftSide != null;
+                 leftSide = queue.poll(10, TimeUnit.MILLISECONDS))
+                for (String[] rule : rules)
+                    for (int index = 0; index <= leftSide.length() - rule[0].length(); index++)
+                        if (leftSide.startsWith(rule[0], index)) {
+                            final String expansion = leftSide.substring(0, index)
+                                    + rule[1]
+                                    + leftSide.substring(index + rule[0].length());
+                            if (expansion.length() <= limit && !beenThere.contains(expansion)) {
+                                beenThere.add(expansion);
+                                if (expansion.equals(expansion.toLowerCase()))
+                                    streamBuilder.accept(expansion);
+                                else
                                     queue.offer(expansion);
-                                    beenThere.add(expansion);
-                                }
                             }
-                    }
-            }
-        } catch (InterruptedException e) {}
+                        }
+        } catch (InterruptedException exception) { /* not happening */ }
 
         return streamBuilder.build();
     }
+
     @Override
     public Stream<String> generate(Stream<String[]> grammar, int uptoLength) {
+        queue.clear();
+        beenThere.clear();
         limit = uptoLength;
         rules = grammar.collect(Collectors.toList());
-        final char start = rules.get(0)[0].charAt(0);
+        final String start = rules.get(0)[0];
         queue.offer(String.valueOf(start));
         return IntStream.range(1, Runtime.getRuntime().availableProcessors())
-                .mapToObj(token -> process())
-                .flatMap(Function.identity())
                 .parallel()
+                .mapToObj(processor -> process())
+                .flatMap(Function.identity())
+                /* Der Cache bereits gesehener Expansionen reicht aufgrund der parallelen Bearbeitung
+                 * leider nicht aus, um Duplikate vollstaendig zu vermeiden. */
                 .distinct();
     }
 
