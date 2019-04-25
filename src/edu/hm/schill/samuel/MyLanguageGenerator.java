@@ -1,5 +1,7 @@
 package edu.hm.schill.samuel;
 
+import edu.hm.cs.rs.compiler.lab04generator.LanguageGenerator;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;

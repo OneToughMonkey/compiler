@@ -7,7 +7,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -50,12 +49,13 @@ public class MyPreprocessor implements edu.hm.cs.rs.compiler.toys.base.Preproces
     @Override public Source process(Source incoming) throws LexicalError {
         final Source outgoing = new Source();
         try {
-            Stream.generate(incoming::hasMore)
-                    .takeWhile(Boolean::booleanValue)
-                    .map(token -> incoming.getNextChar())
-                    .forEach(chr -> state = PROCESSORS.get(state)
-                            .getOrDefault(chr, PROCESSORS.get(state).get('.'))
-                            .apply(chr, outgoing));
+            char chr;
+            while (incoming.hasMore()) {
+                chr = incoming.getNextChar();
+                state = PROCESSORS.get(state)
+                        .getOrDefault(chr, PROCESSORS.get(state).get('.'))
+                        .apply(chr, outgoing);
+            }
 
             FINALIZERS.get(state).orElseThrow(LexicalError::new).accept(outgoing);
         } finally {
@@ -77,7 +77,7 @@ public class MyPreprocessor implements edu.hm.cs.rs.compiler.toys.base.Preproces
          * with a State return value to a BiFunction */
         final BiFunction<BiConsumer<Character, Source>, State, BiFunction<Character, Source, State>>
                 processorMaker = (appender, newState) -> (chr, src) -> {
-            Objects.requireNonNullElse(appender, (chr2, src2) -> {}).accept(chr, src); // fall back to a no-op appender
+            if (appender != null) appender.accept(chr, src);
             return newState;
         };
 

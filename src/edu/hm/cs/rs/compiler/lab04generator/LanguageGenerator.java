@@ -1,4 +1,4 @@
-package edu.hm.schill.samuel;
+package edu.hm.cs.rs.compiler.lab04generator;
 
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -56,4 +56,3 @@ public interface LanguageGenerator {
     }
 
 }
-
