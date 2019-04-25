@@ -84,7 +84,7 @@ public class MyLanguageGenerator implements LanguageGenerator {
         limit = uptoLength;
         rules = grammar.collect(Collectors.toList());
         final String start = rules.get(0)[0];
-        queue.offer(String.valueOf(start));
+        queue.offer(start);
         return IntStream.range(1, Runtime.getRuntime().availableProcessors())
                 .parallel()
                 .mapToObj(processor -> process())
