@@ -2,6 +2,7 @@ package edu.hm.schill.samuel;
 
 import edu.hm.cs.rs.compiler.lab04generator.LanguageGenerator;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -43,7 +44,7 @@ public class MyLanguageGenerator implements LanguageGenerator {
     public static void main(String... args) {
         final LanguageGenerator generator = new MyLanguageGenerator();
         generator.generate(generator.read(args[0]), Integer.parseInt(args[1]))
-                .forEach(System.out::println);
+                .forEachOrdered(System.out::println);
     }
 
     /**
@@ -91,7 +92,8 @@ public class MyLanguageGenerator implements LanguageGenerator {
                 .flatMap(Function.identity())
                 /* Der Cache bereits gesehener Expansionen reicht aufgrund der parallelen Bearbeitung
                  * leider nicht aus, um Duplikate vollstaendig zu vermeiden. */
-                .distinct();
+                .distinct()
+                .sorted(Comparator.comparingInt(String::length).thenComparing(Function.identity()));
     }
 
     @Override
