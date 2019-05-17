@@ -14,6 +14,7 @@ public class MyParserGenerator implements RDParserGenerator {
         String grammar = "=,E=(EOE),E=F,O=+,O=-,F=n,F=-E";
         System.out.println(pg.generate(grammar));
     }
+
     @Override
     public String generate(String grammar) {
         final Map<String[], Set<Character>> firstSets = getFirstSets(grammar);
@@ -36,47 +37,63 @@ public class MyParserGenerator implements RDParserGenerator {
                 + "        Node parseTree = new RDParser" + start + "().parse(args[0]);\n"
                 + "        System.out.println(parseTree);  // Parsebaum in einer Zeile\n"
                 + "        parseTree.prettyPrint();        // Parsebaum gekippt, mehrzeilig\n"
-                + "    }"
+                + "    }\n"
                 + "\n"
                 + "    private char lookahead;\n"
                 + "    private String input;\n"
                 + "\n"
                 + "    public Node parse(String newInput) throws SyntaxErrorException {\n"
-                + "        input = newInput;"
+                + "        input = newInput;\n"
                 + "        return parse" + (int) start + "();\n"
                 + "    }\n"
                 + "\n"
                 + tokens.parallelStream().map(token -> {
-            final Set<Character> combinedFirstSet = firstSets.keySet().stream().filter(arr -> arr[0].charAt(0)==token).flatMap(rule -> firstSets.get(rule).stream()).collect(Collectors.toSet());
+            final Set<Character> combinedFirstSet = firstSets.keySet()
+                    .stream()
+                    .filter(arr -> arr[0].charAt(0) == token)
+                    .flatMap(rule -> firstSets.get(rule).stream())
+                    .collect(Collectors.toSet());
 
-            return "    private Node parse"+(int) token+"() throws SyntaxErrorException {\n"
-                    + "    lookahead = input.charAt(0);\n"
+            return "    private Node parse" + (int) token + "() throws SyntaxErrorException {\n"
                     + "\n"
-                    +
-                    (Character.isUpperCase(token)?
-                            "        if(" + combinedFirstSet.stream().map(chr -> "lookahead != '"+chr+"'").collect(Collectors.joining(" && "))+") \n"
-                                    +		"    	    	throw new SyntaxErrorException(\"Expected one of"
-                                    + combinedFirstSet.stream().map(String::valueOf).collect(Collectors.joining(", "))
-                                    + " but found \" + lookahead);\n"
-                                    +		" 	     Node result = null;\n"
-                                    +		firstSets.keySet().stream().filter(arr -> arr[0].charAt(0)== token).map(rule ->
-                                    "        if("+firstSets.get(rule).stream().map(chr ->
-                                            "lookahead == '"+chr+"'").collect(Collectors.joining(" || ")) + ")\n "
-                                            +		"			result = new Node(\""+token+"\", "+rule[1].chars().mapToObj(chr -> "parse"+chr+"()").collect(Collectors.joining(", "))+");\n"
-                            ).collect(Collectors.joining(""))
-                                    +       "        return result;\n"
+                    + "        lookahead = input.charAt(0);\n"
+                    + "\n"
+                    + (Character.isUpperCase(token) ?
+                    "        if(" + combinedFirstSet.stream()
+                            .map(chr -> "lookahead != '" + chr + "'")
+                            .collect(Collectors.joining(" && "))
+                            + ") \n"
+                            + "    	    	throw new SyntaxErrorException(\"Expected one of "
+                            + combinedFirstSet.stream()
+                            .map(chr -> "'" + chr + "'")
+                            .collect(Collectors.joining(", "))
+                            + " but found '\" + lookahead + \"'\");\n"
+                            + "        Node result = null;\n"
+                            + firstSets.keySet().stream().filter(arr -> arr[0].charAt(0) == token).map(rule ->
+                            "        if(" + firstSets.get(rule).stream()
+                                    .map(chr -> "lookahead == '" + chr + "'")
+                                    .collect(Collectors.joining(" || ")) + ")\n "
+                                    + "        result = new Node(\"" + token + "\", "
+                                    + rule[1].chars()
+                                    .mapToObj(chr -> "parse" + chr + "()")
+                                    .collect(Collectors.joining(", ")) + ");\n"
+                    ).collect(Collectors.joining(""))
+                            + "        return result;\n"
 
-                            :
-                            "        if(lookahead != '"+token+"')\n"
-                                    +		"    	        throw new SyntaxErrorException(\"Expected "+token+" but found \"+lookahead);\n\n"
-                                    +       "        input = input.substring(1);\n"
-                                    +		"        return new Node(\""+token+"\");\n")
-                    +		"    }\n";
+                    :
+                    "        if(lookahead != '" + token + "')\n"
+                            + "    	        throw new SyntaxErrorException(\"Expected '" + token
+                            + "' but found '\" + lookahead + \"'\");\n"
+                            + "\n"
+                            + "        input = input.substring(1);\n"
+                            + "\n"
+                            + "        return new Node(\"" + token + "\");\n")
+                    + "    }\n";
         }).collect(Collectors.joining("\n"))
                 + "}\n";
     }
 
-    public Map<String[], Set<Character>> getFirstSets (String grammar) {
+    public Map<String[], Set<Character>> getFirstSets(String grammar) {
         final char deduct = grammar.charAt(0);
         final char separate = grammar.charAt(1);
         final List<String[]> rules = Stream.of(grammar.split("\\Q" + separate + "\\E"))
