@@ -8,13 +8,10 @@ public class MyParserGenerator implements edu.hm.cs.rs.compiler.lab06rdparsergen
 
     @Override
     public String generate(String grammar) {
+        final Map<String[], Set<Character>> firstSets = getFirstSets(grammar);
         final char deduct = grammar.charAt(0);
         final char separate = grammar.charAt(1);
         final char start = grammar.charAt(2);
-        final List<String[]> rules = Stream.of(grammar.split("\\Q" + separate + "\\E"))
-                .skip(1)
-                .map(string -> string.split("\\Q" + deduct + "\\E", 2))
-                .collect(Collectors.toList());
         final Set<Character> tokens = grammar.chars()
                 .filter(chr -> chr != deduct && chr != separate)
                 .mapToObj(chr -> Character.valueOf((char) chr))
@@ -37,7 +34,13 @@ public class MyParserGenerator implements edu.hm.cs.rs.compiler.lab06rdparsergen
                 + "\n";
     }
 
-    public Map<String[], Set<Character>> getFirstSets (List<String[]> rules) {
+    public Map<String[], Set<Character>> getFirstSets (String grammar) {
+        final char deduct = grammar.charAt(0);
+        final char separate = grammar.charAt(1);
+        final List<String[]> rules = Stream.of(grammar.split("\\Q" + separate + "\\E"))
+                .skip(1)
+                .map(string -> string.split("\\Q" + deduct + "\\E", 2))
+                .collect(Collectors.toList());
         final Map<String[], Set<Character>> firstSets = new HashMap<>();
         rules.stream()
                 .forEach(rule -> firstSets.put(rule, new HashSet<>()));
