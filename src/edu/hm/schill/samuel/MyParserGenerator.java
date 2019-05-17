@@ -42,22 +42,21 @@ public class MyParserGenerator implements edu.hm.cs.rs.compiler.lab06rdparsergen
         rules.stream()
                 .forEach(rule -> firstSets.put(rule, new HashSet<>()));
 
-        boolean changed = true;
-        while (changed) {
-            changed = false;
+        boolean[] changed = {true};
+        while (changed[0]) {
+            changed[0] = false;
             for (String[] rule : rules) {
                char first = rule[1].charAt(0);
                if (first >= 'A' && first <= 'Z') {
                    firstSets.keySet().stream()
                            .filter(otherRule -> otherRule[0].charAt(0) == first)
                            .forEach(otherRule ->
-                                   changed = firstSets.get(rule).addAll(firstSets.get(otherRule)));
+                                   changed[0] = firstSets.get(rule).addAll(firstSets.get(otherRule)) || changed[0]);
                } else {
-                   changed = firstSets.get(rule).add(first) || changed;
+                   changed[0] = firstSets.get(rule).add(first) || changed[0];
                }
             }
         }
-
-
+        return firstSets;
     }
 }
