@@ -46,7 +46,7 @@ public class MyParserGenerator implements RDParserGenerator {
                 + "        return result;\n"
                 + "    }\n"
                 + "\n"
-                + "    public Node terminal(char expected) throws SyntaxErrorException {\n"
+                + "    private Node terminal(char expected) throws SyntaxErrorException {\n"
                 + "        final char lookahead = input.charAt(0);\n"
                 + "        if(lookahead != expected)\n"
                 + "            throw new SyntaxErrorException(\"Expected '\" + expected + \"' but found '\" + lookahead + \"'\");\n"
@@ -62,7 +62,7 @@ public class MyParserGenerator implements RDParserGenerator {
                                 .map(rule ->
                                         "        if(" + firstSets.get(rule).stream()
                                                 .map(chr -> "lookahead == '" + chr + "'")
-                                                .collect(Collectors.joining(" || ")) + ")\n "
+                                                .collect(Collectors.joining(" || ")) + ")\n"
                                                 + "            return new Node(\"" + token + "\", "
                                                 + rule[1].chars()
                                                 .mapToObj(chr ->
